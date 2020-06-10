@@ -38,25 +38,47 @@ parser.push(manifest);
 parser.end();
  
 var parsedManifest = parser.manifest;
-// console.log(parsedManifest);
+console.log(parsedManifest);
 let segmentDuration = 0;    
 let previous = false;
 parsedManifest.segments.map((data, index)=> {
     const subSegmentLength = 30;
-    if(data.discontinuity){
-        if(previous){
-            console.log(`END ${data.uri}: ${segmentDuration}`);
-            return;
-        }
-       console.log(`START ${data.uri}`);
-       segmentDuration += data.duration;
+    if(data.discontinuity && previous){
+        console.log(`END ${data.uri}: ${segmentDuration}`);
+        segmentDuration=0;
+        console.log(`START ${data.uri}`);
     }
-    segmentDuration += data.duration;
-    if((segmentDuration-20)==subSegmentLength){
-        if(previous){ return}
-        console.log(`END ${data.uri}: ${segmentDuration-20}`);
+    if(data.discontinuity && !previous){
         console.log(`START ${data.uri}`);
         previous=true;
-        segmentDuration = 0;
+        segmentDuration+= data.duration;
     }
+    if(!data.discontinuity && previous){
+        segmentDuration+= data.duration;
+    }
+    // console.log(segmentDuration);
+    if((segmentDuration)==subSegmentLength){
+       if(previous) {
+        console.log(`END ${data.uri}: ${segmentDuration}`);
+        segmentDuration=0;
+        console.log(`START ${data.uri}`);
+       }
+    }
+
+    // if(data.discontinuity){
+    //     if(previous){
+    //         console.log(`END ${data.uri}: ${segmentDuration}`);
+    //         return;
+    //     }
+    //    console.log(`START ${data.uri}`);
+    //    segmentDuration += data.duration;
+    // }
+    // segmentDuration += data.duration;
+    // if((segmentDuration-20)==subSegmentLength){
+    //     if(previous){ return}
+    //     console.log(`END ${data.uri}: ${segmentDuration-20}`);
+    //     console.log(`START ${data.uri}`);
+    //     previous=true;
+    //     segmentDuration = 0;
+    // }
 });
