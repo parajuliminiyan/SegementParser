@@ -17,7 +17,7 @@ const manifest = [
     ,'https://reshet-live-il.ctedgecdn.net/13tv-desktop/r13_1200_555874.ts',
     '#EXTINF:10,'
     ,'https://reshet-live-il.ctedgecdn.net/13tv-desktop/r13_1200_555875.ts',
-    '#EXT-X-DISCONTINUIT,',
+    '#EXT-X-DISCONTINUITY,',
     '#EXTINF:10,'
     ,'https://reshet-live-il.ctedgecdn.net/13tv-desktop/r13_1200_555876.ts',
     '#EXTINF:10,'
@@ -38,20 +38,25 @@ parser.push(manifest);
 parser.end();
  
 var parsedManifest = parser.manifest;
-console.log(parsedManifest);
+// console.log(parsedManifest);
 let segmentDuration = 0;    
+let previous = false;
 parsedManifest.segments.map((data, index)=> {
     const subSegmentLength = 30;
     if(data.discontinuity){
+        if(previous){
+            console.log(`END ${data.uri}: ${segmentDuration}`);
+            return;
+        }
        console.log(`START ${data.uri}`);
        segmentDuration += data.duration;
     }
     segmentDuration += data.duration;
     if((segmentDuration-20)==subSegmentLength){
+        if(previous){ return}
         console.log(`END ${data.uri}: ${segmentDuration-20}`);
+        console.log(`START ${data.uri}`);
+        previous=true;
         segmentDuration = 0;
-        if(index < 8){
-            console.log(`START ${data.uri}`);
-        }
-    } 
+    }
 });
